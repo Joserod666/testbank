@@ -84,8 +84,8 @@ components/
 **Servicios Principales:**
 
 1. **EmailService** (`lib/services/email-service.ts`)
-   - Estrategia configurable para envío de correos
-   - Soporte para simulación, Resend, SendGrid, Mailgun, SMTP
+   - Servicio de envío de correos en modo simulación (prueba)
+   - Muestra el contenido del correo en la consola del servidor
    - Generación de templates HTML/texto
 
 2. **AlertChecker** (`lib/services/alert-checker.ts`)
@@ -152,18 +152,37 @@ Usuario → Client Component → Form Action → API Route → Service → Supab
 
 #### Flujo de Alertas Automáticas
 ```
-Server Init → AutoAlertChecker → AlertChecker Service → EmailService → Resend API → Email
-                                      ↓
-                              Supabase (alerts table)
+Usuario carga/refresca página
+    ↓
+AutoAlertChecker (en layout.tsx) se ejecuta automáticamente
+    ↓
+checkAndSendProjectAlerts() se ejecuta en segundo plano
+    ↓
+Consulta proyectos activos (status: "pending" o "in_progress")
+    ↓
+Calcula días hasta fecha de vencimiento
+    ↓
+Filtra proyectos que vencen en ≤ 3 días (o ya vencidos)
+    ↓
+Para cada proyecto urgente:
+    - Genera email de alerta (HTML + texto)
+    - EmailService simula envío (muestra en consola)
+    - Crea registro en tabla 'alerts' (si no existe en últimas 24h)
+    ↓
+Resultado visible en consola del servidor
 ```
 
 **Ejemplo:** Verificación automática de alertas
-1. `AutoAlertChecker` se monta en `app/layout.tsx`
-2. Ejecuta `checkAndSendProjectAlerts()` en background
-3. `AlertChecker` consulta proyectos activos
-4. Filtra proyectos con `due_date <= 3 días`
-5. `EmailService` envía correos (simulado o real)
-6. Crea registros en tabla `alerts`
+1. Usuario accede a cualquier página de la aplicación
+2. `AutoAlertChecker` se ejecuta automáticamente (componente en `app/layout.tsx`)
+3. Verifica que las variables de entorno de Supabase estén disponibles
+4. Ejecuta `checkAndSendProjectAlerts()` de forma asíncrona (no bloquea la página)
+5. `AlertChecker` consulta proyectos activos desde Supabase
+6. Calcula días hasta vencimiento para cada proyecto
+7. Filtra proyectos con `daysUntil <= 3` (incluye proyectos vencidos con días negativos)
+8. `EmailService` genera y simula el envío de correos (muestra en consola del servidor)
+9. Crea registros en tabla `alerts` si no existe una alerta similar en las últimas 24 horas
+10. Los resultados se muestran en la consola del servidor con formato legible
 
 ### Patrones de Diseño Implementados
 
@@ -180,9 +199,9 @@ Server Init → AutoAlertChecker → AlertChecker Service → EmailService → R
 - `lib/supabase/client.ts` (cliente-side)
 - `lib/supabase/server.ts` (server-side)
 
-#### 4. **Strategy Pattern**
-- `EmailService` con múltiples estrategias de envío
-- Configuración mediante variables de entorno
+#### 4. **Service Pattern**
+- `EmailService` encapsula la lógica de envío de correos
+- Modo simulación por defecto (muestra en consola)
 
 #### 5. **Wrapper Pattern**
 - Server Components que actúan como wrappers para Client Components
@@ -222,7 +241,7 @@ Server Init → AutoAlertChecker → AlertChecker Service → EmailService → R
 | **Componentes UI** | shadcn/ui | Latest | Componentes accesibles |
 | **Base de Datos** | PostgreSQL | 15+ | Base de datos relacional |
 | **BaaS** | Supabase | Latest | Backend as a Service |
-| **Email** | Resend | Latest | Servicio de envío de correos |
+| **Email** | Simulación | - | Envío de correos en modo prueba (consola) |
 | **Validación** | Zod | 3.x | Schema validation |
 | **Notificaciones** | Sonner | Latest | Toast notifications |
 | **Fechas** | date-fns | Latest | Manipulación de fechas |
@@ -346,9 +365,16 @@ Usuario → /timeline → TimelinePage (Server) → TimelineWrapper (Server)
 
 #### 5. **Sistema de Alertas**
 ```
-Server Init → AutoAlertChecker → checkAndSendProjectAlerts()
-  → Query Projects → Filter Urgent → EmailService.sendEmail()
-  → Resend API → Email Sent → Insert Alert → Log Result
+Usuario carga página → AutoAlertChecker (layout.tsx)
+  → checkAndSendProjectAlerts() (async, no bloquea)
+  → Query Supabase: proyectos activos (pending/in_progress)
+  → Calcular días hasta vencimiento
+  → Filtrar: daysUntil <= 3
+  → Para cada proyecto urgente:
+      - EmailService.generateProjectAlertEmail()
+      - EmailService.sendEmail() → Consola (Simulación)
+      - Insert en tabla 'alerts' (si no existe duplicado)
+  → Log resultado en consola
 ```
 
 ### Seguridad
@@ -412,12 +438,14 @@ Server Init → AutoAlertChecker → checkAndSendProjectAlerts()
 - Resaltado de proyectos próximos a vencer (< 7 días)
 
 ### Sistema de Alertas
-- Verificación automática de proyectos próximos a vencer (3 días o menos)
-- Envío de correos automáticos (Resend, SendGrid, Mailgun o SMTP)
-- Simulación en consola (por defecto)
-- Endpoint API para verificación manual
-- Script CLI para ejecución manual
-- Botón de prueba de correo
+- **Verificación automática**: Se ejecuta cada vez que se carga o refresca cualquier página
+- **Detección de proyectos urgentes**: Identifica proyectos que vencen en 3 días o menos (configurable)
+- **Envío de correos en modo simulación**: Muestra el contenido del correo en la consola del servidor
+- **Registro en base de datos**: Crea alertas en la tabla `alerts` para historial
+- **Prevención de duplicados**: Evita crear alertas duplicadas en un período de 24 horas
+- **Endpoint API**: `/api/alerts/check` para verificación manual
+- **Script CLI**: `npm run check-alerts` para ejecución manual desde terminal
+- **Botón de prueba**: Interfaz para enviar correos de prueba
 
 ---
 
@@ -441,13 +469,13 @@ Server Init → AutoAlertChecker → checkAndSendProjectAlerts()
    NEXT_PUBLIC_SUPABASE_URL=tu-project-url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
 
-   # Email (Opcional - para correo real)
-   EMAIL_SIMULATION=true  # false para correo real
-   EMAIL_PROVIDER=resend
-   RESEND_API_KEY=tu-api-key
-   EMAIL_FROM=noreply@resend.dev
+   # Email (Modo Prueba - Simulación)
+   EMAIL_SIMULATION=true
    ALERT_EMAIL=tu@email.com
+   NEXT_PUBLIC_APP_URL=http://localhost:3000
    ```
+   
+   **Nota:** El sistema usa modo simulación por defecto. Los correos se mostrarán en la consola del servidor en lugar de enviarse por email real.
 
 4. **Configurar la base de datos:**
    - Ve a tu proyecto en Supabase
@@ -476,8 +504,97 @@ Server Init → AutoAlertChecker → checkAndSendProjectAlerts()
 
 ## 📚 Documentación Adicional
 
-- `ALERTAS_SETUP.md` - Configuración del sistema de alertas
-- `CORREO_REAL_SETUP.md` - Guía para configurar correo real
+- `ALERTAS_SETUP.md` - Configuración detallada del sistema de alertas
+
+---
+
+## 🔔 Sistema de Alertas - Funcionamiento Detallado
+
+### Verificación Automática
+
+El sistema de alertas se ejecuta **automáticamente cada vez que se carga o refresca cualquier página** de la aplicación. Esto se logra mediante el componente `AutoAlertChecker` que está integrado en el `layout.tsx` raíz.
+
+**Características:**
+- ✅ Ejecución automática en cada carga de página
+- ✅ No bloquea la carga de la página (ejecución asíncrona)
+- ✅ Validación de variables de entorno antes de ejecutar
+- ✅ Manejo de errores silencioso (no afecta la experiencia del usuario)
+
+### Criterios de Detección
+
+El sistema identifica proyectos que requieren atención cuando:
+- **Estado del proyecto**: `pending` o `in_progress` (proyectos activos)
+- **Días hasta vencimiento**: 3 días o menos (configurable)
+- **Proyectos vencidos**: También detecta proyectos con fechas pasadas (días negativos)
+
+### Proceso de Envío
+
+1. **Consulta a Base de Datos**:**
+   - Obtiene todos los proyectos activos con sus clientes asociados
+   - Ordena por fecha de vencimiento (más urgentes primero)
+
+2. **Cálculo de Urgencia:**
+   - Calcula días hasta la fecha de vencimiento
+   - Considera proyectos vencidos (días negativos) y próximos a vencer (0-3 días)
+
+3. **Generación de Alertas:**
+   - Para cada proyecto urgente, genera un correo con:
+     - Asunto descriptivo (diferente para vencidos vs próximos a vencer)
+     - Contenido HTML formateado
+     - Versión texto plano
+     - Información del proyecto, cliente y días restantes
+
+4. **Simulación de Envío:**
+   - Muestra el correo completo en la consola del servidor
+   - Formato legible con separadores visuales
+   - Incluye: destinatario, asunto, fecha y contenido completo
+
+5. **Registro en Base de Datos:**
+   - Crea un registro en la tabla `alerts` para historial
+   - Evita duplicados (verifica si existe alerta similar en últimas 24 horas)
+   - Tipos de alerta: `deadline_approaching` o `overdue`
+
+### Ejemplo de Salida en Consola
+
+Cuando se detectan proyectos urgentes, verás en la consola del servidor:
+
+```
+================================================================================
+📧 SIMULACIÓN DE ENVÍO DE CORREO
+================================================================================
+Para: josgus15@outlook.com
+Asunto: ⚠️ Proyecto Próximo a Vencer: Nombre del Proyecto
+Fecha: 2025-12-17T15:00:00.000Z
+--------------------------------------------------------------------------------
+Contenido HTML:
+[HTML completo del correo con información del proyecto]
+================================================================================
+```
+
+### Verificación Manual
+
+Además de la ejecución automática, puedes verificar alertas manualmente:
+
+**1. Endpoint API:**
+```bash
+# GET request
+curl http://localhost:3000/api/alerts/check
+
+# Con parámetros personalizados
+curl "http://localhost:3000/api/alerts/check?email=tu@email.com&days=3"
+```
+
+**2. Script CLI:**
+```bash
+npm run check-alerts
+
+# Con parámetros
+npm run check-alerts -- --email=tu@email.com --days=3
+```
+
+**3. Botón en Interfaz:**
+- Accede a `/alerts` y usa el botón "Generar Alertas" para ejecución manual
+- Usa el botón "Enviar Correo de Prueba" para validar la configuración
 
 ---
 

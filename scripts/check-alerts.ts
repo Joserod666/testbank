@@ -52,17 +52,41 @@ async function main() {
 	}
 
 	if (result.errors.length > 0) {
-		console.log("")
-		console.log("❌ Errores encontrados:")
-		result.errors.forEach((error) => {
-			console.log(`  - ${error}`)
-		})
+		// Filtrar errores de configuración (no críticos)
+		const criticalErrors = result.errors.filter(
+			(error) => !error.includes("variables de entorno")
+		)
+
+		if (criticalErrors.length > 0) {
+			console.log("")
+			console.log("❌ Errores encontrados:")
+			criticalErrors.forEach((error) => {
+				console.log(`  - ${error}`)
+			})
+		}
+
+		// Mostrar advertencias de configuración por separado
+		const configWarnings = result.errors.filter((error) =>
+			error.includes("variables de entorno")
+		)
+		if (configWarnings.length > 0) {
+			console.log("")
+			console.log("⚠️  Advertencias de configuración:")
+			console.log(
+				"  - Verifica que las variables NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY estén en .env.local"
+			)
+			console.log("  - Reinicia el servidor después de agregar las variables")
+		}
 	}
 
 	console.log("=".repeat(80))
 	console.log("")
 
-	process.exit(result.errors.length > 0 ? 1 : 0)
+	// Solo salir con error si hay errores críticos (no de configuración)
+	const hasCriticalErrors = result.errors.some(
+		(error) => !error.includes("variables de entorno")
+	)
+	process.exit(hasCriticalErrors ? 1 : 0)
 }
 
 main().catch((error) => {

@@ -17,11 +17,22 @@ export async function GET(request: NextRequest) {
 
 		const result = await checkAndSendProjectAlerts(email, days)
 
+		// Si hay errores de configuración, no mostrarlos como errores críticos
+		const hasConfigErrors = result.errors.some((error) =>
+			error.includes("variables de entorno")
+		)
+
 		return NextResponse.json(
 			{
-				success: true,
-				message: `Verificación completada. ${result.alertsSent} alerta(s) enviada(s).`,
-				result,
+				success: !hasConfigErrors,
+				message: hasConfigErrors
+					? "Verificación completada (configuración pendiente)"
+					: `Verificación completada. ${result.alertsSent} alerta(s) enviada(s).`,
+				result: {
+					...result,
+					// Filtrar errores de configuración para no mostrarlos al usuario
+					errors: hasConfigErrors ? [] : result.errors,
+				},
 			},
 			{ status: 200 }
 		)
@@ -47,11 +58,22 @@ export async function POST(request: NextRequest) {
 
 		const result = await checkAndSendProjectAlerts(email, days)
 
+		// Si hay errores de configuración, no mostrarlos como errores críticos
+		const hasConfigErrors = result.errors.some((error) =>
+			error.includes("variables de entorno")
+		)
+
 		return NextResponse.json(
 			{
-				success: true,
-				message: `Verificación completada. ${result.alertsSent} alerta(s) enviada(s).`,
-				result,
+				success: !hasConfigErrors,
+				message: hasConfigErrors
+					? "Verificación completada (configuración pendiente)"
+					: `Verificación completada. ${result.alertsSent} alerta(s) enviada(s).`,
+				result: {
+					...result,
+					// Filtrar errores de configuración para no mostrarlos al usuario
+					errors: hasConfigErrors ? [] : result.errors,
+				},
 			},
 			{ status: 200 }
 		)

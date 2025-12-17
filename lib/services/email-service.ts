@@ -26,36 +26,99 @@ export class EmailService {
 	/**
 	 * Envía un correo electrónico
 	 * Si está en modo simulación, solo muestra en consola
-	 * Si está en modo real, usa la API de correo configurada
+	 * Si está en modo real, muestra en consola Y envía el correo real
 	 */
 	async sendEmail(options: EmailOptions): Promise<EmailResult> {
 		if (this.isSimulation) {
+			// Modo simulación: solo mostrar en consola
 			return this.simulateEmail(options)
 		}
 
-		return this.sendRealEmail(options)
+		// Modo real: mostrar preview en consola Y enviar correo real
+		console.log("\n" + "=".repeat(80))
+		console.log("📧 MODO REAL ACTIVADO - Ambos modos funcionando:")
+		console.log("   1️⃣  PREVIEW en consola (simulación)")
+		console.log("   2️⃣  CORREO REAL al destinatario")
+		console.log("=".repeat(80))
+		
+		// 1. Mostrar preview en consola (simulación - siempre funciona)
+		let simulationResult: EmailResult
+		try {
+			simulationResult = await this.simulateEmail(options)
+			console.log("✅ Preview en consola mostrado correctamente")
+		} catch (error) {
+			console.error("❌ Error al mostrar preview:", error)
+			simulationResult = {
+				success: false,
+				error: error instanceof Error ? error.message : "Error desconocido",
+			}
+		}
+		
+		// 2. Enviar correo real (al destinatario configurado)
+		let realResult: EmailResult
+		try {
+			realResult = await this.sendRealEmail(options)
+			if (realResult.success) {
+				console.log("✅ Correo real enviado exitosamente")
+			} else {
+				console.error(`❌ Error al enviar correo real: ${realResult.error}`)
+			}
+		} catch (error) {
+			console.error("❌ Error al enviar correo real:", error)
+			realResult = {
+				success: false,
+				error: error instanceof Error ? error.message : "Error desconocido",
+			}
+		}
+
+		// Retornar el resultado del envío real (pero ambos se ejecutaron)
+		console.log("=".repeat(80))
+		console.log("📊 RESUMEN:")
+		console.log(`   Preview en consola: ${simulationResult.success ? "✅ OK" : "❌ Error"}`)
+		console.log(`   Correo real: ${realResult.success ? "✅ OK" : "❌ Error"}`)
+		console.log("=".repeat(80) + "\n")
+		
+		return realResult
 	}
 
 	/**
 	 * Simula el envío de correo (muestra en consola)
+	 * Siempre se muestra en consola como evidencia/log
 	 */
 	private async simulateEmail(options: EmailOptions): Promise<EmailResult> {
 		const timestamp = new Date().toISOString()
+		const dateFormatted = new Date(timestamp).toLocaleString("es-ES", {
+			year: "numeric",
+			month: "2-digit",
+			day: "2-digit",
+			hour: "2-digit",
+			minute: "2-digit",
+			second: "2-digit",
+		})
+		
+		const modeLabel = this.isSimulation 
+			? "📧 SIMULACIÓN DE ALERTA DE CORREO (evidencia en consola)" 
+			: "📧 PREVIEW DE ALERTA (evidencia en consola + envío real)"
 		
 		console.log("\n" + "=".repeat(80))
-		console.log("📧 SIMULACIÓN DE ENVÍO DE CORREO")
+		console.log(modeLabel)
 		console.log("=".repeat(80))
-		console.log(`Para: ${options.to}`)
-		console.log(`Asunto: ${options.subject}`)
-		console.log(`Fecha: ${timestamp}`)
+		console.log(`📬 Destinatario: ${options.to}`)
+		console.log(`📌 Asunto: ${options.subject}`)
+		console.log(`🕐 Fecha/Hora: ${dateFormatted}`)
+		console.log(`📅 Timestamp: ${timestamp}`)
 		console.log("-".repeat(80))
-		console.log("Contenido HTML:")
+		console.log("📄 CONTENIDO HTML:")
+		console.log("-".repeat(80))
 		console.log(options.html)
 		if (options.text) {
 			console.log("-".repeat(80))
-			console.log("Contenido Texto:")
+			console.log("📄 CONTENIDO TEXTO PLANO:")
+			console.log("-".repeat(80))
 			console.log(options.text)
 		}
+		console.log("=".repeat(80))
+		console.log(`✅ Simulación registrada en consola/log`)
 		console.log("=".repeat(80) + "\n")
 
 		return {
@@ -71,6 +134,9 @@ export class EmailService {
 	private async sendRealEmail(options: EmailOptions): Promise<EmailResult> {
 		try {
 			const emailProvider = process.env.EMAIL_PROVIDER || "resend"
+			console.log("\n" + "=".repeat(80))
+			console.log(`📤 ENVIANDO CORREO REAL (proveedor: ${emailProvider.toUpperCase()})`)
+			console.log("=".repeat(80))
 
 			// Resend (recomendado - fácil de configurar)
 			if (emailProvider === "resend") {
@@ -133,6 +199,7 @@ export class EmailService {
 		}
 
 		const data = await response.json()
+		console.log(`✅ Correo enviado exitosamente (Resend). Message ID: ${data.id}`)
 		return {
 			success: true,
 			messageId: data.id,
@@ -180,9 +247,11 @@ export class EmailService {
 			throw new Error(`SendGrid error: ${errorText || `HTTP ${response.status}`}`)
 		}
 
+		const messageId = `sg-${Date.now()}`
+		console.log(`✅ Correo enviado exitosamente (SendGrid). Message ID: ${messageId}`)
 		return {
 			success: true,
-			messageId: `sg-${Date.now()}`,
+			messageId,
 		}
 	}
 
@@ -219,6 +288,7 @@ export class EmailService {
 		}
 
 		const data = await response.json()
+		console.log(`✅ Correo enviado exitosamente (Mailgun). Message ID: ${data.id}`)
 		return {
 			success: true,
 			messageId: data.id,
@@ -269,6 +339,7 @@ export class EmailService {
 			text: options.text || options.html.replace(/<[^>]*>/g, ""),
 		})
 
+		console.log(`✅ Correo enviado exitosamente (SMTP). Message ID: ${info.messageId}`)
 		return {
 			success: true,
 			messageId: info.messageId,
@@ -367,5 +438,6 @@ Freelance Project Manager
 }
 
 // Instancia singleton
+// Usa simulación si EMAIL_SIMULATION=true o si no está configurado
+// Usa correo real si EMAIL_SIMULATION=false y hay proveedor configurado
 export const emailService = new EmailService(process.env.EMAIL_SIMULATION !== "false")
-
