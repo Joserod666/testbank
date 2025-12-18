@@ -1,0 +1,31 @@
+"use client"
+
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { createClient } from "@/lib/supabase/client"
+import { Button } from "@/components/ui/button"
+import { Check } from "lucide-react"
+
+export function MarkAsReadButton({ alertId }: { alertId: string }) {
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
+
+  async function handleMarkAsRead() {
+    setIsLoading(true)
+    const supabase = createClient()
+
+    const { error } = await supabase.from("alerts").update({ is_read: true }).eq("id", alertId)
+
+    setIsLoading(false)
+
+    if (!error) {
+      router.refresh()
+    }
+  }
+
+  return (
+    <Button variant="ghost" size="icon" onClick={handleMarkAsRead} disabled={isLoading} title="Marcar como leída">
+      <Check className="h-4 w-4" />
+    </Button>
+  )
+}

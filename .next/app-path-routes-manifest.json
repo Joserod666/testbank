@@ -1,0 +1,14 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/alerts/page": "/alerts",
+  "/api/cron/check-deadlines/route": "/api/cron/check-deadlines",
+  "/auth/callback/route": "/auth/callback",
+  "/auth/login/page": "/auth/login",
+  "/auth/signup/page": "/auth/signup",
+  "/clients/page": "/clients",
+  "/icon.png/route": "/icon.png",
+  "/page": "/",
+  "/projects/page": "/projects",
+  "/timeline/page": "/timeline"
+}

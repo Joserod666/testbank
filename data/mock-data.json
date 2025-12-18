@@ -1,0 +1,119 @@
+{
+	"clients": [
+		{
+			"name": "TechStart Inc",
+			"email": "contact@techstart.com",
+			"phone": "+1-555-0101",
+			"company": "TechStart Inc",
+			"notes": "Cliente desde 2023, enfocado en startups tech"
+		},
+		{
+			"name": "Global Retail Co",
+			"email": "info@globalretail.com",
+			"phone": "+1-555-0102",
+			"company": "Global Retail Co",
+			"notes": "Cadena de retail que necesita modernización digital"
+		},
+		{
+			"name": "HealthCare Plus",
+			"email": "hello@healthcareplus.com",
+			"phone": "+1-555-0103",
+			"company": "HealthCare Plus",
+			"notes": "Sector salud, alta prioridad en seguridad"
+		},
+		{
+			"name": "EduLearn",
+			"email": "support@edulearn.com",
+			"phone": "+1-555-0104",
+			"company": "EduLearn",
+			"notes": "Plataforma educativa en crecimiento"
+		},
+		{
+			"name": "Finance Hub",
+			"email": "contact@financehub.com",
+			"phone": "+1-555-0105",
+			"company": "Finance Hub",
+			"notes": "Fintech que busca escalabilidad"
+		}
+	],
+	"projects": [
+		{
+			"clientName": "TechStart Inc",
+			"name": "Dashboard Analytics",
+			"description": "Desarrollo de dashboard con métricas en tiempo real",
+			"status": "in_progress",
+			"priority": "high",
+			"start_date": "2025-01-05",
+			"due_date": "2025-01-20",
+			"completion_percentage": 65,
+			"budget": 8500.00
+		},
+		{
+			"clientName": "Global Retail Co",
+			"name": "E-commerce Platform",
+			"description": "Plataforma completa de comercio electrónico con pasarela de pagos",
+			"status": "in_progress",
+			"priority": "urgent",
+			"start_date": "2024-12-10",
+			"due_date": "2025-01-18",
+			"completion_percentage": 80,
+			"budget": 15000.00
+		},
+		{
+			"clientName": "HealthCare Plus",
+			"name": "Mobile App Redesign",
+			"description": "Rediseño completo de la aplicación móvil",
+			"status": "pending",
+			"priority": "medium",
+			"start_date": "2025-01-20",
+			"due_date": "2025-02-28",
+			"completion_percentage": 10,
+			"budget": 12000.00
+		},
+		{
+			"clientName": "TechStart Inc",
+			"name": "API Integration",
+			"description": "Integración de APIs de terceros para automatización",
+			"status": "in_progress",
+			"priority": "high",
+			"start_date": "2024-12-01",
+			"due_date": "2025-01-15",
+			"completion_percentage": 90,
+			"budget": 5500.00
+		},
+		{
+			"clientName": "EduLearn",
+			"name": "Landing Page",
+			"description": "Nueva landing page con optimización SEO",
+			"status": "completed",
+			"priority": "low",
+			"start_date": "2024-11-15",
+			"due_date": "2024-12-30",
+			"completion_percentage": 100,
+			"budget": 3000.00
+		},
+		{
+			"clientName": "Finance Hub",
+			"name": "CRM System",
+			"description": "Sistema de gestión de relaciones con clientes",
+			"status": "in_progress",
+			"priority": "medium",
+			"start_date": "2025-01-01",
+			"due_date": "2025-03-15",
+			"completion_percentage": 35,
+			"budget": 20000.00
+		},
+		{
+			"clientName": "Global Retail Co",
+			"name": "Payment Gateway",
+			"description": "Implementación de pasarela de pagos segura",
+			"status": "delayed",
+			"priority": "urgent",
+			"start_date": "2024-12-15",
+			"due_date": "2025-01-25",
+			"completion_percentage": 50,
+			"budget": 9000.00
+		}
+	]
+}
+

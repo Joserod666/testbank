@@ -1,0 +1,301 @@
+module.exports = [
+"[project]/lib/supabase/admin.ts [app-rsc] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+/**
+ * Cliente de Supabase para operaciones administrativas
+ * No requiere cookies ni autenticación de usuario
+ * Útil para tareas en segundo plano como verificaciones de deadlines
+ */ __turbopack_context__.s([
+    "createAdminClient",
+    ()=>createAdminClient
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$supabase$2f$supabase$2d$js$2f$dist$2f$index$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_context__.i("[project]/node_modules/@supabase/supabase-js/dist/index.mjs [app-rsc] (ecmascript) <locals>");
+;
+function createAdminClient() {
+    const supabaseUrl = ("TURBOPACK compile-time value", "https://ixasfynswsdelghkbrgj.supabase.co");
+    const supabaseKey = ("TURBOPACK compile-time value", "sb_publishable_VasDtu3o4SOb1McpLAHJkw_kCa8Ymtw");
+    if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
+    ;
+    return (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$supabase$2f$supabase$2d$js$2f$dist$2f$index$2e$mjs__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__$3c$locals$3e$__["createClient"])(supabaseUrl, supabaseKey);
+}
+}),
+"[project]/lib/utils/date-helpers.ts [app-rsc] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "formatDate",
+    ()=>formatDate,
+    "formatDateTime",
+    ()=>formatDateTime,
+    "getDateStatus",
+    ()=>getDateStatus,
+    "getDaysUntil",
+    ()=>getDaysUntil,
+    "getHoursUntil",
+    ()=>getHoursUntil,
+    "getTimeUntilFormatted",
+    ()=>getTimeUntilFormatted,
+    "isOverdue",
+    ()=>isOverdue,
+    "isUpcoming",
+    ()=>isUpcoming,
+    "isWithin7Days",
+    ()=>isWithin7Days
+]);
+function formatDate(date) {
+    const d = new Date(date);
+    return d.toLocaleDateString("es-ES", {
+        year: "numeric",
+        month: "short",
+        day: "numeric"
+    });
+}
+function formatDateTime(date) {
+    const d = new Date(date);
+    return d.toLocaleDateString("es-ES", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
+function getDaysUntil(date) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const target = new Date(date);
+    target.setHours(0, 0, 0, 0);
+    const diff = target.getTime() - today.getTime();
+    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+}
+function getHoursUntil(date) {
+    const now = new Date();
+    const target = new Date(date);
+    const diff = target.getTime() - now.getTime();
+    return Math.ceil(diff / (1000 * 60 * 60));
+}
+function getTimeUntilFormatted(date) {
+    const hoursUntil = getHoursUntil(date);
+    const daysUntil = getDaysUntil(date);
+    if (hoursUntil < 0) {
+        const absHours = Math.abs(hoursUntil);
+        const absDays = Math.floor(absHours / 24);
+        return `${absDays} día${absDays !== 1 ? "s" : ""} y ${absHours % 24} hora${absHours % 24 !== 1 ? "s" : ""} atrasado`;
+    }
+    if (hoursUntil < 24) {
+        return `${hoursUntil} hora${hoursUntil !== 1 ? "s" : ""}`;
+    }
+    const days = Math.floor(hoursUntil / 24);
+    const hours = hoursUntil % 24;
+    if (hours === 0) {
+        return `${days} día${days !== 1 ? "s" : ""}`;
+    }
+    return `${days} día${days !== 1 ? "s" : ""} y ${hours} hora${hours !== 1 ? "s" : ""}`;
+}
+function isWithin7Days(date) {
+    const hoursUntil = getHoursUntil(date);
+    return hoursUntil >= 0 && hoursUntil <= 7 * 24;
+}
+function isOverdue(date) {
+    return getDaysUntil(date) < 0;
+}
+function isUpcoming(date, days = 7) {
+    const daysUntil = getDaysUntil(date);
+    return daysUntil >= 0 && daysUntil <= days;
+}
+function getDateStatus(date) {
+    const daysUntil = getDaysUntil(date);
+    if (daysUntil < 0) return "overdue";
+    if (daysUntil <= 3) return "urgent";
+    if (daysUntil <= 7) return "upcoming";
+    return "normal";
+}
+}),
+"[project]/lib/services/alert-service.ts [app-rsc] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "checkUpcomingDeadlines",
+    ()=>checkUpcomingDeadlines,
+    "processAlerts",
+    ()=>processAlerts,
+    "sendConsoleAlert",
+    ()=>sendConsoleAlert,
+    "sendEmailAlert",
+    ()=>sendEmailAlert
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$supabase$2f$admin$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/lib/supabase/admin.ts [app-rsc] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$utils$2f$date$2d$helpers$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/lib/utils/date-helpers.ts [app-rsc] (ecmascript)");
+;
+;
+async function checkUpcomingDeadlines() {
+    const supabase = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$supabase$2f$admin$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["createAdminClient"])();
+    const { data: projects } = await supabase.from("projects").select("*, clients(name, email)").in("status", [
+        "pending",
+        "in_progress",
+        "delayed"
+    ]).order("due_date", {
+        ascending: true
+    });
+    if (!projects || projects.length === 0) {
+        return [];
+    }
+    const urgentProjects = [];
+    projects.forEach((project)=>{
+        const hoursUntil = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$utils$2f$date$2d$helpers$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getHoursUntil"])(project.due_date);
+        // Proyectos que vencen en 3 días (72 horas) o menos
+        if (hoursUntil >= 0 && hoursUntil <= 72) {
+            urgentProjects.push(project);
+        }
+    });
+    return urgentProjects;
+}
+function sendConsoleAlert(project) {
+    const hoursUntil = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$utils$2f$date$2d$helpers$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getHoursUntil"])(project.due_date);
+    const timeUntil = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$utils$2f$date$2d$helpers$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getTimeUntilFormatted"])(project.due_date);
+    console.log("=".repeat(80));
+    console.log("🚨 ALERTA: Proyecto próximo a vencer");
+    console.log("=".repeat(80));
+    console.log(`Proyecto: ${project.name}`);
+    console.log(`Cliente: ${project.clients.name}`);
+    console.log(`Fecha de vencimiento: ${(0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$utils$2f$date$2d$helpers$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["formatDate"])(project.due_date)}`);
+    console.log(`Tiempo restante: ${timeUntil}`);
+    console.log(`Horas restantes: ${hoursUntil} horas`);
+    console.log(`Estado: ${project.status}`);
+    console.log(`Progreso: ${project.completion_percentage}%`);
+    console.log("=".repeat(80));
+}
+async function sendEmailAlert(project) {
+    const hoursUntil = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$utils$2f$date$2d$helpers$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getHoursUntil"])(project.due_date);
+    const timeUntil = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$utils$2f$date$2d$helpers$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["getTimeUntilFormatted"])(project.due_date);
+    // Verificar que Resend esté configurado
+    const resendApiKey = process.env.RESEND_API_KEY;
+    const fromEmail = process.env.RESEND_FROM_EMAIL || "noreply@example.com";
+    if (!resendApiKey) {
+        console.warn("⚠️ RESEND_API_KEY no configurada. Saltando envío de email real.");
+        return {
+            success: false,
+            error: "RESEND_API_KEY no configurada"
+        };
+    }
+    try {
+        // Importar Resend dinámicamente
+        const resendModule = await __turbopack_context__.A("[project]/node_modules/resend/dist/index.mjs [app-rsc] (ecmascript, async loader)");
+        const Resend = resendModule.Resend || resendModule.default?.Resend || resendModule.default;
+        if (!Resend) {
+            throw new Error("No se pudo importar Resend correctamente");
+        }
+        const resend = new Resend(resendApiKey);
+        const emailContent = `
+			<h2>🚨 Alerta: Proyecto próximo a vencer</h2>
+			<p>El siguiente proyecto está próximo a vencer:</p>
+			<ul>
+				<li><strong>Proyecto:</strong> ${project.name}</li>
+				<li><strong>Cliente:</strong> ${project.clients.name}</li>
+				<li><strong>Fecha de vencimiento:</strong> ${(0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$utils$2f$date$2d$helpers$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["formatDate"])(project.due_date)}</li>
+				<li><strong>Tiempo restante:</strong> ${timeUntil}</li>
+				<li><strong>Horas restantes:</strong> ${hoursUntil} horas</li>
+				<li><strong>Estado:</strong> ${project.status}</li>
+				<li><strong>Progreso:</strong> ${project.completion_percentage}%</li>
+			</ul>
+			<p>Por favor, revisa el proyecto y toma las acciones necesarias.</p>
+		`;
+        // Obtener email del cliente o usar email por defecto
+        const toEmail = project.clients.email || process.env.ALERT_DEFAULT_EMAIL || "admin@example.com";
+        const { data, error } = await resend.emails.send({
+            from: fromEmail,
+            to: [
+                toEmail
+            ],
+            subject: `🚨 Alerta: ${project.name} vence en ${timeUntil}`,
+            html: emailContent
+        });
+        if (error) {
+            console.error("❌ Error al enviar email:", error);
+            return {
+                success: false,
+                error
+            };
+        }
+        console.log("✅ Email enviado exitosamente:", data);
+        return {
+            success: true,
+            data
+        };
+    } catch (error) {
+        console.error("❌ Error al inicializar Resend:", error);
+        return {
+            success: false,
+            error
+        };
+    }
+}
+async function processAlerts() {
+    console.log("\n🔍 Verificando proyectos próximos a vencer...");
+    const urgentProjects = await checkUpcomingDeadlines();
+    if (urgentProjects.length === 0) {
+        console.log("✅ No hay proyectos próximos a vencer (3 días o menos)");
+        return {
+            count: 0,
+            alerts: []
+        };
+    }
+    console.log(`⚠️ Se encontraron ${urgentProjects.length} proyecto(s) próximo(s) a vencer\n`);
+    const alerts = [];
+    for (const project of urgentProjects){
+        // Enviar alerta por consola (simulado) - SIEMPRE se ejecuta
+        sendConsoleAlert(project);
+        // Enviar alerta por email (real) - SIEMPRE se ejecuta si está configurado
+        const emailResult = await sendEmailAlert(project);
+        alerts.push({
+            project: project.name,
+            console: true,
+            email: emailResult.success,
+            emailError: emailResult.error
+        });
+    }
+    return {
+        count: urgentProjects.length,
+        alerts
+    };
+}
+}),
+"[project]/lib/cron/deadline-checker.ts [app-rsc] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "runDeadlineChecker",
+    ()=>runDeadlineChecker,
+    "startDeadlineChecker",
+    ()=>startDeadlineChecker
+]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$services$2f$alert$2d$service$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/lib/services/alert-service.ts [app-rsc] (ecmascript)");
+;
+async function runDeadlineChecker() {
+    try {
+        const result = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$services$2f$alert$2d$service$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["processAlerts"])();
+        return result;
+    } catch (error) {
+        console.error("❌ Error en deadline checker:", error);
+        return {
+            count: 0,
+            alerts: [],
+            error
+        };
+    }
+}
+function startDeadlineChecker(intervalMinutes = 60) {
+    console.log(`⏰ Iniciando verificador de deadlines cada ${intervalMinutes} minutos`);
+    // Ejecutar inmediatamente al iniciar
+    runDeadlineChecker();
+    // Ejecutar periódicamente
+    const intervalMs = intervalMinutes * 60 * 1000;
+    setInterval(()=>{
+        runDeadlineChecker();
+    }, intervalMs);
+}
+}),
+];
+
+//# sourceMappingURL=lib_b308208a._.js.map

@@ -1,0 +1,3 @@
+module.exports=[6464,a=>{"use strict";let b=!1;async function c(){if("phase-production-build"!==process.env.NEXT_PHASE&&!b)try{setTimeout(async()=>{let{startDeadlineChecker:c}=await a.A(73633);c(60),b=!0,console.log("✅ Servidor inicializado - Verificador de deadlines activo")},1e3)}catch(a){console.error("❌ Error al inicializar verificador de deadlines:",a)}}"phase-production-build"!==process.env.NEXT_PHASE&&process.nextTick(()=>{c().catch(console.error)}),a.s(["initializeServer",()=>c])},73633,a=>{a.v(b=>Promise.all(["server/chunks/ssr/_8205e7f0._.js","server/chunks/ssr/node_modules_@supabase_supabase-js_dist_index_mjs_1b27b6a8._.js"].map(b=>a.l(b))).then(()=>b(84380)))}];
+
+//# sourceMappingURL=lib_db842f3b._.js.map
