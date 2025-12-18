@@ -1,8 +1,0 @@
-1:"$Sreact.fragment"
-2:I[97367,["/_next/static/chunks/ff1a16fafef87110.js","/_next/static/chunks/247eb132b7f7b574.js"],"ViewportBoundary"]
-4:I[97367,["/_next/static/chunks/ff1a16fafef87110.js","/_next/static/chunks/247eb132b7f7b574.js"],"MetadataBoundary"]
-5:"$Sreact.suspense"
-7:I[27201,["/_next/static/chunks/ff1a16fafef87110.js","/_next/static/chunks/247eb132b7f7b574.js"],"IconMark"]
-0:{"buildId":"gv3a3qIHS79_WEO7kL1PJ","rsc":["$","$1","h",{"children":[["$","meta",null,{"name":"robots","content":"noindex"}],["$","$L2",null,{"children":"$@3"}],["$","div",null,{"hidden":true,"children":["$","$L4",null,{"children":["$","$5",null,{"name":"Next.Metadata","children":"$@6"}]}]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],"loading":null,"isPartial":false}
-3:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
-6:[["$","title","0",{"children":"Freelance Project Manager"}],["$","meta","1",{"name":"description","content":"Sistema de gestión de proyectos freelance"}],["$","meta","2",{"name":"generator","content":"Next.js"}],["$","link","3",{"rel":"shortcut icon","href":"/icono.png"}],["$","link","4",{"rel":"icon","href":"/icono.png"}],["$","link","5",{"rel":"apple-touch-icon","href":"/icono.png"}],["$","$L7","6",{}]]

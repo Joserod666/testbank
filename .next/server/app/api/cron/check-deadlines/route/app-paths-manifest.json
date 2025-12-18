@@ -1,3 +1,0 @@
-{
-  "/api/cron/check-deadlines/route": "app/api/cron/check-deadlines/route.js"
-}
